@@ -361,14 +361,20 @@
         }
         
         function isDetailValid(detail) {
-            if (!detail.trim()) return false;
+            // เงื่อนไข 1: ห้ามเป็นค่าว่าง
+            if (!detail.trim()) return false; 
+            // เงื่อนไข 2: ห้ามเป็นตัวเลขทั้งหมด (ตามที่ User แจ้งไว้ก่อนหน้า)
             if (/^\d+$/.test(detail.trim())) return false; 
             return true;
         }
 
         function isAmountValid(amountStr) {
             const rawAmount = getRawAmount(amountStr);
+            // เงื่อนไข 1: ห้ามเป็นค่าว่าง (ตรวจสอบก่อนแปลงเป็นตัวเลข)
+            if (!rawAmount) return false;
+            
             const num = parseFloat(rawAmount);
+            // เงื่อนไข 2: ต้องเป็นตัวเลขและมากกว่า 0
             return !isNaN(num) && num > 0;
         }
 
@@ -383,8 +389,10 @@
         // Real-time Validation สำหรับช่องรายละเอียด
         detailInput.addEventListener('input', function() {
             clearError(this); 
-            if (!isDetailValid(this.value) && this.value.trim().length > 0) {
-                displayError(this, detailErrorDiv, "กรุณากรอกแค่ตัวอักษรเท่านั้น!");
+            const detail = this.value.trim();
+            // เช็คว่ากรอกมาแล้วแต่เป็นตัวเลขทั้งหมด
+            if (detail.length > 0 && /^\d+$/.test(detail)) {
+                displayError(this, detailErrorDiv, "กรุณากรอกรายละเอียดเป็นตัวอักษร!");
             }
         });
 
@@ -396,7 +404,8 @@
             const rawAmount = getRawAmount(this.value);
             const num = parseFloat(rawAmount);
 
-            if (rawAmount.length > 0 && !isAmountValid(this.value)) {
+            // เช็คว่าเป็นตัวเลขหรือไม่ และมากกว่า 0 หรือไม่ (เมื่อมีการกรอกค่า)
+            if (rawAmount.length > 0 && (isNaN(num) || num <= 0)) {
                 displayError(amountInput, amountErrorDiv, "กรุณากรอกจำนวนเงินที่เป็นตัวเลขและมากกว่า 0!");
             } else if (currentTransactionType === 'expense' && isAmountValid(this.value)) {
                 if (num > balance) {
@@ -457,19 +466,32 @@
             const desc = detailInput.value.trim();
             const amountStr = amountInput.value.trim();
             const rawAmount = getRawAmount(amountStr);
+            let isValid = true;
 
-            // Re-Validation เพื่อป้องกันการข้ามการแจ้งเตือน
-            if (!isDetailValid(desc)) {
-                displayError(detailInput, detailErrorDiv, "กรุณากรอกแค่ตัวอักษรเท่านั้น!");
-                return; 
+            // 1. ตรวจสอบค่าว่าง/ตัวเลขในช่องรายละเอียด
+            if (!desc) {
+                displayError(detailInput, detailErrorDiv, "กรุณากรอกรายละเอียด!");
+                isValid = false;
+            } else if (/^\d+$/.test(desc)) {
+                displayError(detailInput, detailErrorDiv, "กรุณากรอกรายละเอียดเป็นตัวอักษร!");
+                isValid = false;
             }
-            if (!isAmountValid(amountStr)) {
+
+            // 2. ตรวจสอบค่าว่าง/ความถูกต้องในช่องจำนวนเงิน
+            if (!rawAmount) {
+                displayError(amountInput, amountErrorDiv, "กรุณากรอกจำนวนเงิน!");
+                isValid = false;
+            } else if (!isAmountValid(amountStr)) {
+                // หากกรอกแล้วแต่รูปแบบผิด
                 displayError(amountInput, amountErrorDiv, "กรุณากรอกจำนวนเงินที่เป็นตัวเลขและมากกว่า 0!");
-                return;
+                isValid = false;
             }
             
+            if (!isValid) return; // หากมีข้อผิดพลาด ให้หยุด
+
             const amount = parseFloat(rawAmount);
 
+            // 3. ตรวจสอบยอดคงเหลือ (เฉพาะรายจ่าย)
             if (currentTransactionType === 'expense' && amount > balance) {
                 const formattedAmount = amount.toLocaleString('en-US');
                 const errorMessage = `ยอดเงินคงเหลือ ${balance.toLocaleString('en-US')} บาท ไม่สามารถจ่าย ${formattedAmount} บาทได้!`;
@@ -531,6 +553,8 @@
                 setScreen('final-exit'); 
             } else {
                 setScreen('main');
+                // *** เพิ่มการเรียก showSummary() เพื่อแสดงรายการทั้งหมดเมื่อกลับเมนูหลัก ***
+                showSummary(); 
             }
         }
 
