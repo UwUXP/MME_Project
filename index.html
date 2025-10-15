@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MME Project: จัดการรายรับ/รายจ่าย</title>
-    <meta property="og:title" content="MME Project: จัดการรายรับ/รายจ่าย" />
-    <meta property="og:description" content="โปรแกรมจัดการรายรับรายจ่ายส่วนตัว" />
-    <meta property="og:url" content="https://yourusername.github.io/your-repo-name/" />
+    <meta property="og:title" content="MME Project" />
+    <meta property="og:description" content="Make Money EZier" />
+    <meta property="og:url" content="https://uwuxp.github.io/MME_Project/" />
     <meta property="og:type" content="website" />
     <style>
         body {
@@ -197,9 +197,9 @@
         </div>
         
         <div class="main-menu-buttons buttons-group" id="mainMenu">
-            <button id="addIncomeBtn" onclick="showInputForm('income')">1. เพิ่มรายการรายรับ</button>
-            <button id="addExpenseBtn" onclick="showInputForm('expense')" style="display: none;">2. เพิ่มรายการรายจ่าย</button>
-            <button id="exitProgramBtn" onclick="showExitConfirmation()">3. ออกจากโปรแกรม</button>
+            <button id="addIncomeBtn" onclick="showInputForm('income')">เพิ่มรายการรายรับ</button>
+            <button id="addExpenseBtn" onclick="showInputForm('expense')" style="display: none;">เพิ่มรายการรายจ่าย</button>
+            <button id="exitProgramBtn" onclick="showExitConfirmation()">ออกจากโปรแกรม</button>
         </div>
 
         <div class="input-form buttons-group" id="inputForm">
@@ -279,10 +279,10 @@
             clearError(detailInput);
             clearError(amountInput);
             
-            // *** ปรับหัวข้อตามสถานะ ***
+            // ปรับหัวข้อตามสถานะ
             if (screenToShow === 'main' && isFirstRun) {
                  mainTitle.textContent = 'Welcome to MME Project';
-                 isFirstRun = false; // เมื่อแสดงครั้งแรกแล้ว ให้ตั้งเป็น false
+                 isFirstRun = false; 
             } else if (screenToShow === 'main' || screenToShow === 'input') {
                  mainTitle.textContent = 'MME Project';
             }
@@ -291,7 +291,7 @@
             if (screenToShow === 'main') {
                 mainMenuDiv.style.display = 'flex';
                 outputDiv.classList.remove('hidden-output');
-                clearOutput(false); // ไม่ส่ง isFirstRun เข้าไปใน clearOutput
+                clearOutput(false); 
                 updateMainMenu(); 
             } else if (screenToShow === 'input') {
                 inputFormDiv.style.display = 'flex';
@@ -396,7 +396,7 @@
             const num = parseFloat(rawAmount);
 
             if (rawAmount.length > 0 && !isAmountValid(this.value)) {
-                displayError(this, amountErrorDiv, "กรุณากรอกจำนวนเงินที่เป็นตัวเลขและมากกว่า 0!");
+                displayError(amountInput, amountErrorDiv, "กรุณากรอกจำนวนเงินที่เป็นตัวเลขและมากกว่า 0!");
             } else if (currentTransactionType === 'expense' && isAmountValid(this.value)) {
                 if (num > balance) {
                     const formattedAmount = num.toLocaleString('en-US');
